@@ -1,0 +1,25 @@
+// Copyright (C) 2017-2024 Smart code 203358507
+
+@border-radius: 2.75rem;
+
+.multiselect-menu {
+    position: relative;
+    min-width: 8.5rem;
+    overflow: visible;
+    border-radius: @border-radius;
+
+    &:hover,
+    &.active {
+        background-color: var(--overlay-color);
+    }
+}
+
+.menu-popup {
+    min-width: 11rem;
+
+    > [role='listbox'] {
+        position: static;
+        max-height: none;
+        box-shadow: none;
+    }
+}

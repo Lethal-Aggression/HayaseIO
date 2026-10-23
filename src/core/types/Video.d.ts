@@ -1,0 +1,39 @@
+// Copyright (C) 2017-2026 Smart code 203358507
+
+type VideoDeepLinks = {
+    metaDetailsStreams: string,
+    player: string | null,
+    externalPlayer: ExternalPlayerLinks | null,
+};
+
+type ContentRating = {
+    value: string,
+    system?: string,
+    icon?: string,
+};
+
+type Video = {
+    id: string,
+    title: string,
+    overview: string | null,
+    released: string | null,
+    thumbnail: string | null,
+    season?: number,
+    episode?: number,
+    streams: Stream[],
+    trailerStreams: TrailerStream[],
+    watched: boolean,
+    progress: number,
+    upcoming: boolean,
+    deepLinks: VideoDeepLinks,
+    scheduled: boolean,
+    startTime?: string | null,
+    endTime?: string | null,
+    runtime?: string | null,
+    releaseInfo?: string | null,
+    genres?: string[],
+    cast?: string[],
+    directors?: string[],
+    links?: Link[],
+    ratings?: ContentRating[],
+};

@@ -1,0 +1,29 @@
+// Copyright (C) 2017-2026 Smart code 203358507
+
+type DiscoverDeepLinks = {
+    discover: string,
+};
+
+type MetaItemPreviewDiscover = MetaItemPreview & {
+    inLibrary: boolean,
+    deepLinks: MetaItemDeepLinks,
+};
+
+type DiscoverCatalogOption<T> = SelectableCatalog<T> & {
+    id: string,
+    addon: Addon,
+    isEpgGuide: boolean,
+};
+
+type Discover = {
+    catalog: Catalog<Loadable<MetaItemPreviewDiscover[]>> | null,
+    selectable: {
+        catalogs: DiscoverCatalogOption<DiscoverDeepLinks>,
+        extra: SelectableExtra<DiscoverDeepLinks>[],
+        types: SelectableType<DiscoverDeepLinks>[],
+        nextPage: boolean,
+    },
+    selected: {
+        request: ResourceRequest,
+    } | null,
+};

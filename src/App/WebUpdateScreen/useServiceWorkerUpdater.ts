@@ -1,0 +1,193 @@
+// Copyright (C) 2017-2026 Smart code 203358507
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Workbox, type WorkboxLifecycleEvent, type WorkboxLifecycleWaitingEvent } from 'workbox-window';
+import { usePlatform } from 'stremio/common';
+import usePWA from 'stremio/common/usePWA';
+
+const UPDATE_CHECK_INTERVAL = 30 * 60 * 1000;
+const APPLY_TIMEOUT = 3 * 1000;
+const RELOADED_FOR_UPDATE_KEY = 'web-update-reloaded';
+
+const consumeReloadedForUpdate = () => {
+    try {
+        const reloaded = sessionStorage.getItem(RELOADED_FOR_UPDATE_KEY) !== null;
+        sessionStorage.removeItem(RELOADED_FOR_UPDATE_KEY);
+        return reloaded;
+    } catch {
+        return false;
+    }
+};
+
+const reloadedForUpdate = consumeReloadedForUpdate();
+
+type UpdaterState =
+    | { status: 'idle' }
+    | { status: 'ready', autoApply: boolean }
+    | { status: 'applying' }
+    | { status: 'reload-ready' };
+
+type Runtime = {
+    workbox: Workbox | null,
+    applying: boolean,
+    timeout: ReturnType<typeof setTimeout> | null,
+    checkForUpdate: (() => void) | null,
+};
+
+const clearApplyTimeout = (runtime: Runtime) => {
+    if (runtime.timeout !== null) {
+        clearTimeout(runtime.timeout);
+        runtime.timeout = null;
+    }
+};
+
+const useServiceWorkerUpdater = () => {
+    const { shell } = usePlatform();
+    const [isIOSPWA, isStandalonePWA] = usePWA();
+    const [state, setState] = useState<UpdaterState>({ status: 'idle' });
+    const [dismissed, setDismissed] = useState(false);
+    const runtimeRef = useRef<Runtime>({
+        workbox: null,
+        applying: false,
+        timeout: null,
+        checkForUpdate: null,
+    });
+    const appLike = shell.active || Boolean(isIOSPWA) || Boolean(isStandalonePWA);
+
+    const dismissUpdate = useCallback(() => {
+        setDismissed(true);
+    }, []);
+
+    const applyUpdate = useCallback(() => {
+        if (state.status === 'reload-ready') {
+            window.location.reload();
+            return;
+        }
+
+        const runtime = runtimeRef.current;
+        if (runtime.applying || runtime.workbox === null || state.status !== 'ready') {
+            return;
+        }
+
+        runtime.applying = true;
+        clearApplyTimeout(runtime);
+        setState({ status: 'applying' });
+        // Chrome only swaps workers once the old one is idle; unloading the page guarantees that.
+        runtime.timeout = setTimeout(() => {
+            runtime.timeout = null;
+            try {
+                sessionStorage.setItem(RELOADED_FOR_UPDATE_KEY, '1');
+            } finally {
+                window.location.reload();
+            }
+        }, APPLY_TIMEOUT);
+        runtime.workbox.messageSkipWaiting();
+    }, [state.status]);
+
+    useEffect(() => {
+        const serviceWorkerDisabled = process.env.SERVICE_WORKER_DISABLED as string | boolean | undefined;
+        if (
+            process.env.NODE_ENV !== 'production' ||
+            serviceWorkerDisabled === 'true' ||
+            serviceWorkerDisabled === true ||
+            !('serviceWorker' in navigator)
+        ) {
+            return;
+        }
+
+        const runtime = runtimeRef.current;
+        const workbox = new Workbox('service-worker.js');
+        let registered = false;
+        let lastUpdateCheck = Date.now();
+        runtime.workbox = workbox;
+
+        const onWaiting = (event: WorkboxLifecycleWaitingEvent) => {
+            setDismissed(false);
+            setState({
+                status: 'ready',
+                autoApply: appLike && event.wasWaitingBeforeRegister === true && !reloadedForUpdate,
+            });
+        };
+        const onControlling = (event: WorkboxLifecycleEvent) => {
+            clearApplyTimeout(runtime);
+            if (runtime.applying || reloadedForUpdate) {
+                window.location.reload();
+            } else if (event.isUpdate || event.isExternal) {
+                setDismissed(false);
+                setState({ status: 'reload-ready' });
+            }
+        };
+        const checkForUpdate = () => {
+            const now = Date.now();
+            if (
+                !registered ||
+                navigator.serviceWorker.controller === null ||
+                now - lastUpdateCheck < UPDATE_CHECK_INTERVAL
+            ) {
+                return;
+            }
+
+            lastUpdateCheck = now;
+            workbox.update().catch((error) => {
+                console.error('SW update check failed: ', error);
+            });
+        };
+        runtime.checkForUpdate = checkForUpdate;
+
+        workbox.addEventListener('waiting', onWaiting);
+        workbox.addEventListener('controlling', onControlling);
+        workbox.register()
+            .then(() => {
+                registered = true;
+            })
+            .catch((error) => {
+                console.error('SW registration failed: ', error);
+            });
+
+        return () => {
+            registered = false;
+            workbox.removeEventListener('waiting', onWaiting);
+            workbox.removeEventListener('controlling', onControlling);
+            clearApplyTimeout(runtime);
+            runtime.applying = false;
+            runtime.checkForUpdate = null;
+            if (runtime.workbox === workbox) {
+                runtime.workbox = null;
+            }
+        };
+    }, [appLike]);
+
+    useEffect(() => {
+        const onForeground = () => {
+            setDismissed(false);
+            runtimeRef.current.checkForUpdate?.();
+        };
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                onForeground();
+            }
+        };
+        const onShellVisibilityChange = ({ visible }: { visible?: boolean }) => {
+            if (visible) {
+                onForeground();
+            }
+        };
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        shell.on('win-visibility-changed', onShellVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            shell.off('win-visibility-changed', onShellVisibilityChange);
+        };
+    }, [shell]);
+
+    return {
+        state,
+        dismissed,
+        applyUpdate,
+        dismissUpdate,
+    };
+};
+
+export default useServiceWorkerUpdater;

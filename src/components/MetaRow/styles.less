@@ -1,0 +1,172 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
+@import (reference) '~stremio/common/screen-sizes.less';
+
+.visible-items(@rows, @landscape-rows) {
+    .hide-from(@items, @landscape-items) {
+        @{rows} {
+            .meta-item, .meta-item-placeholder {
+                &:nth-child(n+@{items}) {
+                    display: none;
+                }
+            }
+        }
+
+        @{landscape-rows} {
+            .meta-item, .meta-item-placeholder {
+                &:nth-child(n+@{landscape-items}) {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    @media only screen and (max-width: @large) {
+        .hide-from(10, 9);
+    }
+
+    @media only screen and (max-width: @normal) {
+        .hide-from(9, 8);
+    }
+
+    @media only screen and (max-width: @medium) {
+        .hide-from(8, 7);
+    }
+
+    @media only screen and (max-width: @small) {
+        .hide-from(7, 6);
+    }
+
+    @media only screen and (max-width: @xsmall) {
+        .hide-from(6, 5);
+    }
+
+    @media only screen and (max-width: @xxsmall) {
+        .hide-from(5, 4);
+    }
+}
+
+.meta-row-container {
+    overflow: visible;
+
+    .header-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 1rem;
+        margin-bottom: 0.25rem;
+
+        .title-container {
+            flex: 1;
+            max-height: 2.4em;
+            font-size: 1.6rem;
+            font-weight: 500;
+        }
+
+        .see-all-container {
+            flex: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            max-width: 12rem;
+            height: 2.5rem;
+            padding: 0 0.5rem 0 1rem;
+            border-radius: 2.5rem;
+            opacity: 0.6;
+
+            &:hover, &:focus {
+                outline: none;
+                background-color: var(--overlay-color);
+                opacity: 1;
+            }
+
+            .label {
+                flex: 0 1 auto;
+                max-height: 1.2em;
+                font-weight: 500;
+            }
+
+            .icon {
+                flex: none;
+                height: 1.5rem;
+                margin-left: 0.5rem;
+            }
+        }
+    }
+
+    .message-container {
+        max-height: 3.6em;
+        padding: 0 0.5rem;
+        font-size: 1.3rem;
+        opacity: 0.6;
+    }
+
+    .meta-items-container {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        overflow: visible;
+
+        .meta-item {
+            &.poster-shape-poster {
+                flex: calc(1 / var(--poster-shape-ratio));
+            }
+
+            &.poster-shape-square {
+                flex: 1;
+            }
+
+            &.poster-shape-landscape {
+                flex: calc(1 / var(--landscape-shape-ratio));
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: @minimum) {
+    .meta-row-container {
+        .header-container {
+            padding: 0 0.5rem;
+
+            .title-container {
+                margin-right: 0.5rem;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .meta-items-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            overscroll-behavior-x: contain;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+
+            .meta-item {
+                scroll-snap-align: start;
+
+                &:not(:first-child) {
+                    margin-left: 0;
+                }
+
+                &:empty {
+                    display: none;
+                }
+
+                &.poster-shape-poster, &.poster-shape-square {
+                    flex: 0 0 31%;
+                }
+
+                &.poster-shape-landscape {
+                    flex: 0 0 46%;
+                }
+            }
+        }
+    }
+}

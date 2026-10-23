@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          version: 11.8.0
+          run_install: false
+      - name: Setup node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: pnpm build
+      - name: Zip build artifact
+        run: zip -r stremio-web.zip ./build
+      - name: Upload build artifact to GitHub release assets
+        uses: svenstaro/upload-release-action@2.11.5
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: stremio-web.zip
+          asset_name: stremio-web.zip
+          tag: ${{ github.ref }}
+          overwrite: true

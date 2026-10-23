@@ -1,0 +1,90 @@
+// Copyright (C) 2017-2024 Smart code 203358507
+
+@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
+@import (reference) '~stremio/common/screen-sizes.less';
+
+.nav-tab-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #a1a1aa;
+
+    @media (pointer: fine) {
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            transform: scale(1.06);
+
+            .icon {
+                opacity: 0.95;
+            }
+        }
+    }
+
+    &:global(.selected) {
+        background-color: rgba(255, 46, 147, 0.16);
+        color: #ff2e93;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: -0.95rem;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+            background-color: #ff2e93;
+            box-shadow: 0 0 12px #ff2e93;
+        }
+
+        .icon {
+            opacity: 1;
+            color: #ff2e93;
+            filter: drop-shadow(0 0 8px rgba(255, 46, 147, 0.6));
+        }
+    }
+
+    .icon, .logo {
+        flex: none;
+        width: 1.65rem;
+        height: 1.65rem;
+        margin: 0;
+    }
+
+    .icon {
+        opacity: 0.5;
+        transition: all 0.2s ease;
+    }
+
+    .label {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: @minimum) {
+    .nav-tab-button-container {
+        .label {
+            opacity: 0.6;
+        }
+
+        &:global(.selected) {
+            .label {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+@media (pointer: coarse) {
+    .nav-tab-button-container {
+        transition: scale 100ms ease-out;
+
+        &:active {
+            scale: 0.9;
+        }
+    }
+}

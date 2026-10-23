@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "jsx": "react",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "types": ["node"],
+        "paths": {
+            "stremio/*": ["./src/*"],
+        },
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "allowJs": true,
+        "checkJs": false,
+        "noEmit": false,
+        "strict": true,
+    },
+    "include": [
+        "src/",
+    ]
+}

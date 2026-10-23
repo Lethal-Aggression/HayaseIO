@@ -1,0 +1,83 @@
+// Copyright (C) 2017-2024 Smart code 203358507
+
+.item {
+    flex: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--overlay-color);
+    border-radius: var(--border-radius);
+    border: 0.15rem solid transparent;
+    transition: border-color 0.1s ease-out;
+
+    .heading {
+        flex: none;
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: 3.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-foreground-color);
+        padding: 0 1rem;
+    }
+
+    .body {
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0 0.5rem 0.5rem;
+    }
+
+    &.placeholder {
+        opacity: 0.7;
+        pointer-events: none;
+
+        .text {
+            width: 8rem;
+            height: 1.2rem;
+            background-color: var(--overlay-color);
+            border-radius: 0.2rem;
+        }
+
+        .video {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.625rem;
+            border-radius: var(--border-radius);
+            background-color: var(--overlay-color);
+
+            .artwork {
+                flex: none;
+                width: 8rem;
+                aspect-ratio: 16 / 9;
+                background-color: var(--overlay-color);
+                border-radius: 0.5rem;
+            }
+
+            .name {
+                flex: auto;
+                height: 1.2rem;
+                background-color: var(--overlay-color);
+                border-radius: 0.2rem;
+            }
+        }
+    }
+
+    &.today {
+        .heading {
+            background-color: var(--primary-accent-color);
+        }
+    }
+
+    &.active {
+        border-color: var(--primary-foreground-color);
+    }
+
+    &:not(.active):hover {
+        border-color: var(--overlay-color);
+    }
+}

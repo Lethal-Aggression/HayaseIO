@@ -1,0 +1,296 @@
+// Copyright (C) 2017-2024 Smart code 203358507
+
+@import (reference) '~stremio/common/screen-sizes.less';
+@import (reference) '~@stremio/stremio-colors/less/stremio-colors.less';
+
+@font-face {
+    font-family: 'PlusJakartaSans';
+    src: url('/assets/fonts/PlusJakartaSans.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'TwemojiFlags';
+    src: url('/assets/fonts/TwemojiFlags.woff2') format('woff2');
+    unicode-range: U+1F1E6-1F1FF;
+}
+
+:global {
+    @import (once, less) '~stremio/common/animations.less';
+    @import (once, less) '~stremio-router/styles.css';
+}
+
+// iOS pads the bottom inset more than needed, so we deduce the actual inset size when using the webapp
+@calculated-bottom-safe-inset: ~"min(calc(env(safe-area-inset-bottom, 0rem) / var(--interface-scale)), max(1rem, calc(var(--viewport-height-diff) - var(--safe-area-inset-top))))";
+
+// Viewport sizes
+@viewport-width: ~"calc(100vw / var(--interface-scale))";
+@viewport-height: ~"calc(100vh / var(--interface-scale))";
+
+// HTML sizes
+@html-width: ~"calc(max(var(--small-viewport-width), var(--dynamic-viewport-width)))";
+@html-height: ~"calc(max(var(--small-viewport-height), var(--dynamic-viewport-height)))";
+@html-standalone-width: ~"calc(max(100%, var(--large-viewport-width)))";
+@html-standalone-height: ~"calc(max(100%, var(--large-viewport-height)))";
+
+// Safe area insets
+@safe-area-inset-top: calc(env(safe-area-inset-top, 0rem) / var(--interface-scale));
+@safe-area-inset-right: calc(env(safe-area-inset-right, 0rem) / var(--interface-scale));
+@safe-area-inset-bottom: calc(env(safe-area-inset-bottom, 0rem) / var(--interface-scale));
+@safe-area-inset-left: calc(env(safe-area-inset-left, 0rem) / var(--interface-scale));
+
+@top-overlay-size: 5.25rem;
+@bottom-overlay-size: 0rem;
+@overlap-size: 3rem;
+@transparency-gradient-pad: 6rem;
+
+:root {
+    --interface-scale: 1;
+    --landscape-shape-ratio: 0.5625;
+    --poster-shape-ratio: 1.464;
+    --scroll-bar-size: 6px;
+    --horizontal-nav-bar-size: 4.5rem;
+    --vertical-nav-bar-size: 4.75rem;
+    --focus-outline-size: 2px;
+    --color-facebook: #1877F1;
+    --color-x: #000000;
+    --color-reddit: #FF4500;
+    --color-imdb: #f5c518;
+    --color-trakt: rgb(255, 255, 255);
+    --color-placeholder: #60606080;
+    --color-placeholder-text: @color-surface-50;
+    --color-placeholder-background: @color-surface-dark5-20;
+    --primary-background-color: #000000;
+    --secondary-background-color: #050508;
+    --primary-foreground-color: #fafafa;
+    --secondary-foreground-color: #0d0d12;
+    --primary-accent-color: #ff2e93;
+    --secondary-accent-color: #f43f5e;
+    --tertiary-accent-color: #38bdf8;
+    --quaternary-accent-color: #a855f7;
+    --overlay-color: rgba(255, 255, 255, 0.06);
+    --modal-background-color: #0a0a0e;
+    --outer-glow: 0px 0px 18px rgba(255, 46, 147, 0.35);
+    --warning-accent-color: rgba(255, 165, 0, 1);
+    --danger-accent-color: rgba(220, 38, 38, 1);  
+    --border-radius: 0.85rem;
+    --top-overlay-size: @top-overlay-size;
+    --bottom-overlay-size: @bottom-overlay-size;
+    --overlap-size: @overlap-size;
+    --transparency-gradient-pad: @transparency-gradient-pad;
+    --safe-area-inset-top: @safe-area-inset-top;
+    --safe-area-inset-right: @safe-area-inset-right;
+    --safe-area-inset-bottom: @safe-area-inset-bottom;
+    --safe-area-inset-left: @safe-area-inset-left;
+    --dynamic-viewport-width: @viewport-width;
+    --dynamic-viewport-height: @viewport-height;
+    --large-viewport-width: @viewport-width;
+    --large-viewport-height: @viewport-height;
+    --small-viewport-width: @viewport-width;
+    --small-viewport-height: @viewport-height;
+    --viewport-height-diff: calc(100vh - 100vh);
+
+    @supports (height: 100dvh) {
+        --dynamic-viewport-width: calc(100dvw / var(--interface-scale));
+        --dynamic-viewport-height: calc(100dvh / var(--interface-scale));
+    }
+
+    @supports (height: 100lvh) {
+        --large-viewport-width: calc(100lvw / var(--interface-scale));
+        --large-viewport-height: calc(100lvh / var(--interface-scale));
+    }
+
+    @supports (height: 100svh) {
+        --small-viewport-width: calc(100svw / var(--interface-scale));
+        --small-viewport-height: calc(100svh / var(--interface-scale));
+    }
+
+    @supports (height: 100lvh) and (height: 100svh) {
+        --viewport-height-diff: calc((100lvh - 100svh) / var(--interface-scale));
+    }
+
+    @media (display-mode: standalone) {
+        --safe-area-inset-bottom: @calculated-bottom-safe-inset;
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: inherit;
+    border: none;
+    outline: none;
+    list-style: none;
+    user-select: none;
+    text-decoration: none;
+    appearance: none;
+    background: none;
+    box-shadow: none;
+    overflow: hidden;
+    word-break: break-word;
+    scrollbar-width: thin;
+    scrollbar-color: var(--overlay-color) transparent;
+}
+
+::-webkit-scrollbar {
+    width: var(--scroll-bar-size);
+    height: var(--scroll-bar-size);
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: var(--scroll-bar-size);
+    background-color: var(--overlay-color);
+
+    &:hover {
+        background-color: var(--primary-accent-color);
+    }
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+svg {
+    overflow: visible;
+}
+
+::view-transition-group(root) {
+    animation-duration: 0.1s;
+}
+
+html {
+    zoom: var(--interface-scale);
+    width: @html-width;
+    height: @html-height;
+    font-family: 'Nunito', 'PlusJakartaSans', 'Cairo', 'Arial', 'Helvetica', 'TwemojiFlags', 'sans-serif';
+    color: var(--primary-foreground-color);
+    overflow: auto;
+    overscroll-behavior: none;
+    user-select: none;
+    touch-action: manipulation;
+    background-color: var(--primary-background-color);
+    -webkit-tap-highlight-color: transparent;
+
+    @media (display-mode: standalone) {
+        width: @html-standalone-width;
+        height: @html-standalone-height;
+        -webkit-touch-callout: none;
+    }
+
+    body {
+        width: 100%;
+        height: 100%;
+        background: #000000 !important;
+        background-color: #000000 !important;
+        -webkit-font-smoothing: antialiased;
+
+        :global(#app) {
+            position: relative;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+
+            .toasts-container {
+                position: absolute;
+                top: calc(1.2 * var(--horizontal-nav-bar-size) + var(--safe-area-inset-top));
+                right: var(--safe-area-inset-right);
+                bottom: calc(1.2 * var(--horizontal-nav-bar-size) + var(--safe-area-inset-bottom, 0rem));
+                left: auto;
+                z-index: 1;
+                padding: 0 calc(0.5 * var(--horizontal-nav-bar-size));
+                overflow: visible;
+                scrollbar-width: none;
+                pointer-events: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+            }
+
+            .tooltip-container {
+                height: 2.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 1.5rem;
+                color: var(--primary-foreground-color);
+                border-radius: var(--border-radius);
+                background-color: var(--modal-background-color);
+                box-shadow: var(--outer-glow);
+                transition: opacity 0.1s ease-out;
+            }
+
+            .updater-banner-container {
+                z-index: 1;
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                @media only screen and (max-width: @minimum) {
+                    left: 0.5rem;
+                    right: 0.5rem;
+                    bottom: calc(var(--vertical-nav-bar-size) + var(--safe-area-inset-bottom) + 0.5rem);
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: @xxlarge) {
+    html {
+        font-size: 18px;
+    }
+}
+
+@media only screen and (max-width: @xxlarge) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media only screen and (max-width: @large) {
+    html {
+        font-size: 15px;
+    }
+}
+
+@media only screen and (max-width: @medium) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (max-width: @xsmall) {
+    html {
+        body {
+            :global(#app) {
+                .toasts-container {
+                    padding: 0 1rem;
+                }
+
+                .tooltip-container {
+                    display: none;
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: @minimum) {
+    :root {
+        --bottom-overlay-size: 6rem;
+    }
+}
+
+::cue {
+    font-family: 'Cairo', 'Nunito', 'PlusJakartaSans', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 5px #000000, 0 0 8px #000000, 1px 1px 3px #000000, -1px -1px 3px #000000 !important;
+    background: transparent !important;
+}
+
